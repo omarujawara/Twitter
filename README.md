@@ -1,6 +1,6 @@
-# Project 3 - *Tweetir"*
+# Project 3 - *Twieetir*
 
-**Tweetir** is a basic twitter app to read your tweets.
+**Twieetir** is a basic twitter app to read your tweets.
 
 Time spent: **5** hours spent in total
 
@@ -23,4 +23,5 @@ The following **bonus** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
+![twieetir_p1](https://user-images.githubusercontent.com/47614340/134830590-423c869e-8fa9-476d-8db5-e564ef3576bf.gif)
 
