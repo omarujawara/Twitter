@@ -9,16 +9,44 @@
 import UIKit
 
 class HomeTableTableViewController: UITableViewController {
+    
+    var tweetArrray = [NSDictionary]()
+    var numberOfTweets: Int!
+    
+    let myRefreshControl = UIRefreshControl()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        loadTweet()
+        
+        myRefreshControl.addTarget(self, action: #selector(loadTweet), for: .valueChanged)
+        tableView.refreshControl = myRefreshControl
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
+    
+    @objc func loadTweet() {
+        let tweetURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
+        let params = ["counts":10]
+        
+        TwitterAPICaller.client?.getDictionariesRequest(url: tweetURL, parameters: params, success: { (tweets: [NSDictionary]) in
+            self.tweetArrray.removeAll()
+            for tweet in tweets {
+                self.tweetArrray.append(tweet)
+            }
+            
+            self.tableView.reloadData()
+            self.myRefreshControl.endRefreshing()
+            
+        }, failure: { (Error) in
+            print("Cound not retreive tweets")
+        })
+    }
+    
+    
     @IBAction func onLogout(_ sender: Any) {
         TwitterAPICaller.client?.logout()
         self.dismiss(animated: true, completion: nil)
@@ -27,8 +55,18 @@ class HomeTableTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "tweetCell", for: indexPath) as! TweetCell
-        cell.userNameLabel.text = "some name"
-        cell.tweetContent.text = "some content"
+        
+        let user = tweetArrray[indexPath.row]["user"] as! NSDictionary
+        cell.userNameLabel.text = user["name"] as? String
+        cell.tweetContent.text = tweetArrray[indexPath.row]["text"] as? String
+        
+        let imageURL = URL(string: ((user["profile_image_url_https"] as? String)!))
+        let data = try? Data(contentsOf: imageURL!)
+        
+        if let imageData = data {
+            cell.profileImageView.image = UIImage(data: imageData)
+        }
+        
         return cell
     }
     
@@ -41,7 +79,7 @@ class HomeTableTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 5
+        return tweetArrray.count
     }
 
     /*
